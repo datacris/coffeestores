@@ -9,7 +9,8 @@ const useTrackLocation = () => {
     const latitude = position.coords.latitude;
     const longitude = position.coords.longitude;
 
-    setLatLong(`${latitude},${longitude}`);
+    // separated by '%2C' for API purposes consummed in FOURSQUARE
+    setLatLong(`${latitude}%2C${longitude}`);
     setLocationErrorMsg("");
     setIsFindingLocation(false);
   };

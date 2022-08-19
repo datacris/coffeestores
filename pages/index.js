@@ -6,7 +6,7 @@ import Card from "../components/card";
 import coffeeStoresData from "../data/coffee-stores.json";
 import { fetchCoffeeStores } from "../lib/coffee-stores";
 import useTrackLocation from "../hooks/use-track-location";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 //Static Site Generator
 export async function getStaticProps(context) {
@@ -19,9 +19,12 @@ export async function getStaticProps(context) {
 }
 
 export default function Home(props) {
+  const [coffeeStores, setCoffeeStores] = useState([]);
+  const [coffeeStoresError, setCoffeeStoresError] = useState(null);
   const { handleTrackLocation, latLong, locationErrorMsg, isFindingLocation } =
     useTrackLocation();
   console.log({ latLong, locationErrorMsg });
+
   const handleOnBannerBtnClick = () => {
     console.log("hi banner");
     handleTrackLocation();
@@ -31,13 +34,14 @@ export default function Home(props) {
     const setCoffeeStoresByLocation = async () => {
       if (latLong) {
         try {
-          const fetchedCoffeeStores = await fetchCoffeeStores(latLong);
-          console.log({ fetchedCoffeeStores });
+          const fetchedCoffeeStores = await fetchCoffeeStores(latLong, 30);
+          setCoffeeStores(fetchedCoffeeStores);
         } catch (e) {
           console.error(e.message);
+          setCoffeeStoresError(e.message);
         }
       }
-    }
+    };
     setCoffeeStoresByLocation();
   }, [latLong]);
 
@@ -54,6 +58,7 @@ export default function Home(props) {
           handleOnClick={handleOnBannerBtnClick}
         />
         {locationErrorMsg && <p>Something went wrong: {locationErrorMsg}</p>}
+        {coffeeStoresError && <p>Something went wrong: {coffeeStoresError}</p>}
         <div className={styles.heroImage}>
           <Image src="/static/hero-image.png" width={200} height={200} />
         </div>
@@ -62,6 +67,24 @@ export default function Home(props) {
             <h2 className={styles.heading2}>Toronto Stores</h2>
             <div className={styles.cardLayout}>
               {props.coffeeStores.map((coffeeStore) => {
+                return (
+                  <Card
+                    key={coffeeStore.id}
+                    classname={styles.card}
+                    name={coffeeStore.name}
+                    imgUrl={coffeeStore.imgUrl}
+                    href={`/coffee-store/${coffeeStore.id}`}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        )}
+        {coffeeStores.length > 0 && (
+          <div className={styles.sectionWrapper}>
+            <h2 className={styles.heading2}>Stores Near me</h2>
+            <div className={styles.cardLayout}>
+              {coffeeStores.map((coffeeStore) => {
                 return (
                   <Card
                     key={coffeeStore.id}

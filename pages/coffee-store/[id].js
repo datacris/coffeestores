@@ -8,17 +8,19 @@ import { fetchCoffeeStores } from "../../lib/coffee-stores";
 
 // getting entity based on path
 export async function getStaticProps(staticProps) {
-  const coffeeStores = await fetchCoffeeStores();
   const params = staticProps.params;
+  const coffeeStores = await fetchCoffeeStores();
+  const findCoffeeStoreById = coffeeStores.find((coffeeStore) => {
+    return coffeeStore.id.toString() === params.id;
+  });
+
   return {
     props: {
-      coffeeStore: coffeeStores.find((coffeeStore) => {
-        return coffeeStore.id.toString() === params.id;
-      }),
+      coffeeStore: findCoffeeStoreById ? findCoffeeStoreById : {},
     },
   };
 }
-// Getting dynamic paths in server side
+// Getting dynamic paths in server side, re-hydrates staticProps for getStaticProps
 export async function getStaticPaths() {
   const coffeeStores = await fetchCoffeeStores();
   const paths = coffeeStores.map((coffeeStore) => {
